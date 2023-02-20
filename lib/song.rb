@@ -49,4 +49,36 @@ class Song
     song.save
   end
 
+  # Create a new Song instance given a row from the database
+  def self.new_from_db(row)
+    # self.new = Song.new
+    self.new(id: row[0], name: row[1], album: row[2])
+  end
+
+  # Create new instances for each row in the table songs based on data returned from the entire table
+  def self.all
+    sql = <<-SQL
+      SELECT *
+      FROM songs
+    SQL
+
+      DB[:conn].execute(sql).map do |row|
+        self.new_from_db(row)
+      end
+  end
+
+  # Finds a record from the table matching the given name and converts it into an instance
+  def self.find_by_name(name)
+    sql = <<-SQL
+      SELECT *
+      FROM songs
+      WHERE name = ?
+      LIMIT 1
+    SQL
+
+      DB[:conn].execute(sql, name).map do |row|
+        self.new_from_db(row)
+      end.first
+  end
+
 end
